@@ -1,20 +1,31 @@
-# USE ON IG1-L...IG5-R
-
 import socket
 import subprocess
 
-EXECUTABLE = "VIRUP.exe "
+TCP_PORT = 12345
 BUFFER_SIZE = 1024
+EXECUTABLE = "Z:\\VIRUP\\virup\\VIRUP-0.7-17-gf3cbc46-windows-64bit\\VIRUP.exe"
+MESSAGE_TO_CLIENT = "Data received"
+ENCODING_METHOD = "utf-8"
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('', 12345))
-s.listen(1) # allow for one connection to the socket
+serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+serverSocket.bind(('', TCP_PORT))
+serverSocket.listen(1) # allow for one connection to the server socket
 
 while True:
-    clientSocket, address = s.accept()
-    print(f"Connection from {address}")
-    clientSocket.send(bytes("Welcome to the server", "utf-8"))
+    conn, address = serverSocket.accept()
+    print(f"Connection from client {address}")
     
-    clientData = s.recv(BUFFER_SIZE)
-    print(clientData)
-    clientSocket.send(bytes("Data received by server", "utf-8"))
+    arguments = (conn.recv(BUFFER_SIZE)).decode(ENCODING_METHOD)
+    print("Message from client: " + arguments)
+
+    conn.send(bytes(MESSAGE_TO_CLIENT, ENCODING_METHOD))
+
+    #command = EXECUTABLE + arguments
+    command = EXECUTABLE
+    print(f"Command to be executed: {command}")
+
+    subprocess.run([command])
+
+    conn.close()
+
+    break
